@@ -2,19 +2,21 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3001', // Cấu hình URL mặc định
+  baseURL: 'http://localhost:8080/api', // Cấu hình URL mặc định
   timeout: 5000,                    // Nếu quá 5s mà chưa phản hồi thì lỗi
   headers: {
     // 'Content-Type': 'application/json', //Gửi dữ liệu JSON (Content-Type)
-    'Authorization': 'Bearer token...', // thêm nếu có token
-    'Content-Type': 'multipart/form-data', //Gửi Form Data (khi upload file)
+    // 'Authorization': 'Bearer token...', // thêm nếu có token
+    // 'Content-Type': 'multipart/form-data', //Gửi Form Data (khi upload file)
   }
 });
 
 // Thêm interceptor để log hoặc xử lý lỗi/tự động thêm token
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 

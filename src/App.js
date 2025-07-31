@@ -1,11 +1,8 @@
-import logo from './logo.svg';
-import './App.css';
-import LoginForm from './pages/auth/LoginPage';
+import React from 'react';
+import AppRouters from './routes/MainRotues';
 
 function App() {
-  return (
-   <LoginForm />
-  );
+  return <AppRouters />;
 }
 
 export default App;
