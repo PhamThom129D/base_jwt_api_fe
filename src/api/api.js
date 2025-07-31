@@ -2,29 +2,43 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api', // Cấu hình URL mặc định
-  timeout: 5000,                    // Nếu quá 5s mà chưa phản hồi thì lỗi
+  baseURL: 'http://localhost:8080/api',
+  timeout: 5000,
   headers: {
-    // 'Content-Type': 'application/json', //Gửi dữ liệu JSON (Content-Type)
-    // 'Authorization': 'Bearer token...', // thêm nếu có token
-    // 'Content-Type': 'multipart/form-data', //Gửi Form Data (khi upload file)
-  }
+    'Content-Type': 'application/json',
+  },
 });
 
-// Thêm interceptor để log hoặc xử lý lỗi/tự động thêm token
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Thêm token vào mỗi request nếu có
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+      console.log('Token gửi đi:', token);
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
+// Ghi log lỗi và chuyển tiếp lỗi ra ngoài
 api.interceptors.response.use(
-  res => res,
-  err => {
-    console.error('API error:', err.message);
-    return Promise.reject(err);
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+
+    if (status === 401) {
+      console.warn("⛔ Unauthorized - cần đăng nhập lại");
+    } else if (status === 403) {
+      console.warn("⛔ Forbidden - không có quyền truy cập");
+    } else {
+      console.error(`🚨 Lỗi API [${status}]:`, error.message);
+    }
+
+    return Promise.reject(error);
   }
 );
 
