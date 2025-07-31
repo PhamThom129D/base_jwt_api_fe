@@ -1,4 +1,3 @@
-// ListProductPage.js
 import React, { useEffect, useState } from 'react';
 import {
   getListProducts,
@@ -11,13 +10,20 @@ import ProductTable from '../../components/admin/manageProduct/ProductTable';
 import ProductForm from '../../components/admin/manageProduct/ProductForm';
 
 import {
-  Dialog, DialogContent, DialogTitle, DialogActions, Button
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogActions,
+  Button,
+  Typography
 } from '@mui/material';
 
 function ListProductPage() {
   const [products, setProducts] = useState([]);
   const [openForm, setOpenForm] = useState(false);
-  const [editData, setEditData] = useState(null); // null = add, object = edit
+  const [editData, setEditData] = useState(null);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   const loadProducts = () => {
     getListProducts()
@@ -29,15 +35,25 @@ function ListProductPage() {
     loadProducts();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-      try {
-        await deleteProduct(id);
-        loadProducts();
-      } catch (err) {
-        console.error('Lỗi xóa sản phẩm:', err);
-      }
+  const handleDelete = (product) => {
+    setProductToDelete(product);
+    setOpenConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await deleteProduct(productToDelete.id);
+      setOpenConfirm(false);
+      setProductToDelete(null);
+      loadProducts();
+    } catch (err) {
+      console.error('Lỗi xóa sản phẩm:', err);
     }
+  };
+
+  const cancelDelete = () => {
+    setOpenConfirm(false);
+    setProductToDelete(null);
   };
 
   const handleEdit = (product) => {
@@ -55,28 +71,19 @@ function ListProductPage() {
     setEditData(null);
   };
 
-  const handleSubmitForm = async (formDataObject) => {
-    const formData = new FormData();
-    formData.append('name', formDataObject.name);
-    formData.append('price', formDataObject.price);
-    formData.append('quantity', formDataObject.quantity);
-    formData.append('description', formDataObject.description);
-    if (formDataObject.imageFile) {
-      formData.append('image', formDataObject.imageFile); // 'image' là tên field trong controller
+  const handleSubmitForm = async (formData) => {
+    try {
+      if (editData) {
+        await updateProduct(editData.id, formData);
+      } else {
+        await addProduct(formData);
+      }
+      handleCloseForm();
+      loadProducts();
+    } catch (err) {
+      console.error("Lỗi submit form:", err);
     }
-
-  try {
-    if (editData) {
-      await updateProduct(editData.id, formData); // cập nhật
-    } else {
-      await addProduct(formData); // thêm mới
-    }
-    handleCloseForm();
-    loadProducts();
-  } catch (err) {
-    console.error("Lỗi submit form:", err);
-  }
-};
+  };
 
   return (
     <div style={{ padding: 24 }}>
@@ -87,6 +94,7 @@ function ListProductPage() {
         onAdd={handleAdd}
       />
 
+      {/* Form Thêm/Sửa */}
       <Dialog open={openForm} onClose={handleCloseForm} maxWidth="sm" fullWidth>
         <DialogTitle>{editData ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới'}</DialogTitle>
         <DialogContent dividers>
@@ -95,6 +103,25 @@ function ListProductPage() {
         <DialogActions>
           <Button onClick={handleCloseForm} color="secondary">
             Hủy
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog xác nhận xóa */}
+      <Dialog open={openConfirm} onClose={cancelDelete}>
+        <DialogTitle>Xác nhận xóa</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Bạn có chắc chắn muốn xóa sản phẩm{' '}
+            <strong>{productToDelete?.name}</strong> không?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDelete} color="primary">
+            Hủy
+          </Button>
+          <Button onClick={confirmDelete} color="error" variant="contained">
+            Xóa
           </Button>
         </DialogActions>
       </Dialog>

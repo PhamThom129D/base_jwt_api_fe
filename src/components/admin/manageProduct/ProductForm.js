@@ -65,7 +65,23 @@ function ProductForm({ onSubmit, initialData }) {
           {initialData ? '📝 Cập nhật sản phẩm' : '➕ Thêm sản phẩm mới'}
         </Typography>
 
-        <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
+     <form
+  onSubmit={handleSubmit((data) => {
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('price', data.price);
+    formData.append('quantity', data.quantity);
+    formData.append('description', data.description);
+
+    if (data.imageFile && data.imageFile[0]) {
+      formData.append('image', data.imageFile[0]);
+    }
+
+    onSubmit(formData); // Truyền formData lên ListProductPage
+  })}
+  encType="multipart/form-data"
+>
+
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6}>
               <TextField

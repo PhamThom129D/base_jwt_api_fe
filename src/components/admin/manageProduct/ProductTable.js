@@ -13,29 +13,44 @@ import EditIcon from '@mui/icons-material/EditOutlined';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { IMAGE_BASE_URL } from '../../../constants/config';
 
 function ProductTable({ data, onAdd, onEdit, onDelete }) {
   const { darkMode } = useTheme();
 
   const columns = [
     { accessorKey: 'id', header: 'Mã' },
-    {
-      accessorKey: 'imageUrl',
-      header: 'Ảnh',
-      Cell: ({ cell }) => (
-        <img
-          src={cell.getValue()}
-          alt="product"
-          style={{
-            width: 50,
-            height: 50,
-            borderRadius: 8,
-            objectFit: 'cover',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-          }}
-        />
-      )
-    },
+
+{
+  accessorKey: 'imageUrl',
+  header: 'Ảnh',
+  Cell: ({ row }) => {
+    const imageFileName = row.original.imageUrl; // tên file ảnh, ví dụ: "product1.jpg"
+    const imageUrl = `${IMAGE_BASE_URL}${imageFileName}`;
+    return (
+      <img
+  src={imageUrl}
+  alt="product"
+  style={{
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    objectFit: 'cover',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+  }}
+  onError={(e) => {
+    if (!e.target.src.includes('no-image.png')) {
+      e.target.onerror = null;
+      e.target.src = `${IMAGE_BASE_URL}no-image.png`;
+    }
+  }}
+/>
+
+    );
+  }
+},
+
+
     { accessorKey: 'name', header: 'Tên sản phẩm' },
     { accessorKey: 'description', header: 'Mô tả' },
     {
@@ -48,11 +63,7 @@ function ProductTable({ data, onAdd, onEdit, onDelete }) {
         })
     },
     { accessorKey: 'quantity', header: 'Tồn kho' },
-    {
-      accessorKey: 'owner.username',
-      header: 'Người tạo',
-      Cell: ({ cell }) => <strong>{cell.getValue()}</strong>
-    },
+
     {
       header: 'Hành động',
       size: 100,
@@ -64,7 +75,7 @@ function ProductTable({ data, onAdd, onEdit, onDelete }) {
             </IconButton>
           </Tooltip>
           <Tooltip title="Xóa">
-            <IconButton color="error" onClick={() => onDelete(row.original.id)}>
+            <IconButton color="error" onClick={() => onDelete(row.original)}>
               <DeleteIcon />
             </IconButton>
           </Tooltip>
