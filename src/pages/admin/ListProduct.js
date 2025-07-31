@@ -1,129 +1,83 @@
+// ListProductPage.js
 import React, { useEffect, useState } from 'react';
-import ProductSearch from '../../components/admin/manageProduct/ProductSearch';
+import { getListProducts, deleteProduct } from '../../services/productService';
+import ProductTable from '../../components/admin/manageProduct/ProductTable';
 import ProductForm from '../../components/admin/manageProduct/ProductForm';
-import ProductTable from '../../components/admin/manageProduct/ProducTable';
 import {
-  getListProducts,
-  searchProductByName,
-  addProduct,
-  updateProduct,
-  deleteProduct
-} from '../../services/productService';
+  Dialog, DialogContent, DialogTitle, DialogActions, Button
+} from '@mui/material';
 
-function ProductPage() {
+function ListProductPage() {
   const [products, setProducts] = useState([]);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState('');
+  const [openForm, setOpenForm] = useState(false);
+  const [editData, setEditData] = useState(null); // dữ liệu đang sửa
 
-  const fetchProducts = async () => {
-    const res = await getListProducts();
-    setProducts(res.data);
-  };
-
-  const handleSearch = async (keyword) => {
-    setSearchKeyword(keyword);
-    if (keyword) {
-      const res = await searchProductByName({ name: keyword });
-      setProducts(res.data);
-    } else {
-      fetchProducts();
-    }
-  };
-
-  const handleDelete = async (id) => {
-    await deleteProduct(id);
-    fetchProducts();
-  };
-
-  const handleSave = async (product) => {
-    if (product.id) {
-      await updateProduct(product.id, {
-        name: product.name,
-        price: product.price,
-        description: product.description,
-        quantity: product.quantity,
-        imageUrl: product.imageUrl,
-      });
-    } else {
-      await addProduct(product);
-    }
-    setEditingProduct(null);
-    setShowModal(false);
-    fetchProducts();
-  };
-
-  const handleAdd = () => {
-    setEditingProduct(null);
-    setShowModal(true);
-  };
-
-  const handleEdit = (product) => {
-    setEditingProduct(product);
-    setShowModal(true);
+  const loadProducts = () => {
+    getListProducts()
+      .then((res) => setProducts(res.data))
+      .catch((err) => console.error('Lỗi load sản phẩm:', err));
   };
 
   useEffect(() => {
-    fetchProducts();
+    loadProducts();
   }, []);
 
+  const handleDelete = async (id) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+      try {
+        await deleteProduct(id);
+        loadProducts();
+      } catch (err) {
+        console.error('Lỗi xóa sản phẩm:', err);
+      }
+    }
+  };
+
+  const handleEdit = (product) => {
+    setEditData(product);
+    setOpenForm(true);
+  };
+
+  const handleAdd = () => {
+    setEditData(null);
+    setOpenForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setOpenForm(false);
+    setEditData(null);
+  };
+
+  const handleSubmitForm = (formData) => {
+    // console.log("Submit form:", formData)
+    // TODO: gọi API tạo/cập nhật
+    // Nếu có editData => gọi update, không thì gọi create
+    handleCloseForm();
+    loadProducts();
+  };
+
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Quản lý sản phẩm</h2>
-      <ProductSearch onSearch={handleSearch} />
+    <div style={{ padding: 24 }}>
+      <ProductTable
+        data={products}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onAdd={handleAdd}
+      />
 
-      <div style={{ margin: '20px 0' }}>
-        <button
-          onClick={handleAdd}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#28a745',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-          }}
-        >
-          + Thêm sản phẩm
-        </button>
-      </div>
-
-      <ProductTable products={products} onEdit={handleEdit} onDelete={handleDelete} />
-
-      {showModal && (
-        <div style={modalStyles.overlay}>
-          <div style={modalStyles.content}>
-            <h3>{editingProduct ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới'}</h3>
-            <ProductForm product={editingProduct} onSave={handleSave} />
-            <div style={{ textAlign: 'right', marginTop: 20 }}>
-              <button onClick={() => setShowModal(false)}>Đóng</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog open={openForm} onClose={handleCloseForm} maxWidth="sm" fullWidth>
+        <DialogTitle>{editData ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới'}</DialogTitle>
+        <DialogContent dividers>
+          <ProductForm onSubmit={handleSubmitForm} initialData={editData} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseForm} color="secondary">
+            Hủy
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
 
-const modalStyles = {
-  overlay: {
-    position: 'fixed',
-    top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  content: {
-    backgroundColor: '#fff',
-    padding: 30,
-    borderRadius: 10,
-    minWidth: '400px',
-    maxWidth: '90%',
-    maxHeight: '90vh',
-    overflowY: 'auto',
-  }
-};
-
-export default ProductPage;
+export default ListProductPage;

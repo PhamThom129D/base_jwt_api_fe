@@ -11,11 +11,11 @@ export const searchProductByName = (data) => {
 };
 
 
-export const addProduct = (data) => {
-  return api.post('/products/add-product', data);
+export const addProduct = (dataForm) => {
+  return api.post('/products/add-product', dataForm);
 }
-export const updateProduct = (id, data) => {
-  return api.put(`/products/update-product/${id}`, data);
+export const updateProduct = (id, dataForm) => {
+  return api.put(`/products/update-product/${id}`, dataForm);
 };
 
 export const deleteProduct = (id) => {
