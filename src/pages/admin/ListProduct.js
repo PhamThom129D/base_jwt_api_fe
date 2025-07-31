@@ -1,8 +1,15 @@
 // ListProductPage.js
 import React, { useEffect, useState } from 'react';
-import { getListProducts, deleteProduct } from '../../services/productService';
+import {
+  getListProducts,
+  deleteProduct,
+  addProduct,
+  updateProduct
+} from '../../services/productService';
+
 import ProductTable from '../../components/admin/manageProduct/ProductTable';
 import ProductForm from '../../components/admin/manageProduct/ProductForm';
+
 import {
   Dialog, DialogContent, DialogTitle, DialogActions, Button
 } from '@mui/material';
@@ -10,7 +17,7 @@ import {
 function ListProductPage() {
   const [products, setProducts] = useState([]);
   const [openForm, setOpenForm] = useState(false);
-  const [editData, setEditData] = useState(null); // dữ liệu đang sửa
+  const [editData, setEditData] = useState(null); // null = add, object = edit
 
   const loadProducts = () => {
     getListProducts()
@@ -48,13 +55,28 @@ function ListProductPage() {
     setEditData(null);
   };
 
-  const handleSubmitForm = (formData) => {
-    // console.log("Submit form:", formData)
-    // TODO: gọi API tạo/cập nhật
-    // Nếu có editData => gọi update, không thì gọi create
+  const handleSubmitForm = async (formDataObject) => {
+    const formData = new FormData();
+    formData.append('name', formDataObject.name);
+    formData.append('price', formDataObject.price);
+    formData.append('quantity', formDataObject.quantity);
+    formData.append('description', formDataObject.description);
+    if (formDataObject.imageFile) {
+      formData.append('image', formDataObject.imageFile); // 'image' là tên field trong controller
+    }
+
+  try {
+    if (editData) {
+      await updateProduct(editData.id, formData); // cập nhật
+    } else {
+      await addProduct(formData); // thêm mới
+    }
     handleCloseForm();
     loadProducts();
-  };
+  } catch (err) {
+    console.error("Lỗi submit form:", err);
+  }
+};
 
   return (
     <div style={{ padding: 24 }}>

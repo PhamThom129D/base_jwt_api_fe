@@ -12,8 +12,11 @@ import {
 import EditIcon from '@mui/icons-material/EditOutlined';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 function ProductTable({ data, onAdd, onEdit, onDelete }) {
+  const { darkMode } = useTheme();
+
   const columns = [
     { accessorKey: 'id', header: 'Mã' },
     {
@@ -71,9 +74,18 @@ function ProductTable({ data, onAdd, onEdit, onDelete }) {
   ];
 
   return (
-    <Paper elevation={3} sx={{ padding: 2 }}>
+    <Paper
+      elevation={3}
+      sx={{
+        padding: 2,
+        backgroundColor: darkMode ? '#1e1e1e' : '#fff',
+        color: darkMode ? '#eee' : '#000'
+      }}
+    >
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h6">Danh sách sản phẩm</Typography>
+        <Typography variant="h6" color={darkMode ? 'white' : 'black'}>
+          Danh sách sản phẩm
+        </Typography>
         <Button
           variant="contained"
           color="success"
@@ -95,6 +107,18 @@ function ProductTable({ data, onAdd, onEdit, onDelete }) {
         initialState={{
           pagination: { pageSize: 5 },
           showGlobalFilter: true,
+        }}
+        muiTableHeadCellProps={{
+          sx: {
+            backgroundColor: darkMode ? '#2c2c2c' : '#f5f5f5',
+            color: darkMode ? '#fff' : '#000'
+          }
+        }}
+        muiTableBodyCellProps={{
+          sx: {
+            color: darkMode ? '#ddd' : '#000',
+            backgroundColor: darkMode ? '#1a1a1a' : '#fff'
+          }
         }}
       />
     </Paper>

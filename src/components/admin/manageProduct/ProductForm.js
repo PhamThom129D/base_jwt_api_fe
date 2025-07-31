@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   TextField,
   Button,
@@ -33,7 +33,12 @@ function ProductForm({ onSubmit, initialData }) {
     defaultValues: initialData || {}
   });
 
+  const [imagePreview, setImagePreview] = useState(initialData?.imageUrl || null);
+
+  const imageFile = watch('imageFile');
+
   useEffect(() => {
+    // Gán dữ liệu ban đầu nếu có
     if (initialData) {
       for (const key in initialData) {
         setValue(key, initialData[key]);
@@ -41,9 +46,17 @@ function ProductForm({ onSubmit, initialData }) {
     }
   }, [initialData, setValue]);
 
-  const imagePreview = watch('imageFile')?.[0]
-    ? URL.createObjectURL(watch('imageFile')[0])
-    : initialData?.imageUrl;
+  useEffect(() => {
+    if (imageFile && imageFile[0]) {
+      const file = imageFile[0];
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+
+      return () => {
+        URL.revokeObjectURL(previewUrl);
+      };
+    }
+  }, [imageFile]);
 
   return (
     <Card elevation={6} sx={{ borderRadius: 3, p: 2 }}>
