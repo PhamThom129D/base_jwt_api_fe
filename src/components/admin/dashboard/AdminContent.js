@@ -1,9 +1,11 @@
+import ProductPage from "../../../pages/admin/ListProduct";
+
 function AdminContent({ tab }) {
   switch (tab) {
     case 'users':
       return <p>📋 Danh sách người dùng</p>;
     case 'products':
-      return <p>📦 Danh sách sản phẩm</p>;
+      return <ProductPage />;
     case 'orders':
       return <p>🧾 Danh sách đơn hàng</p>;
     case 'account':

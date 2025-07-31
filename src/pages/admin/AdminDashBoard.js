@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import useAuth from '../../hook/useAuth';
-import AdminSidebar from '../../components/admin/AdminSidebar';
-import AdminHeader from '../../components/admin/AdminHeader';
-import AdminContent from '../../components/admin/AdminContent';
+import AdminSidebar from '../../components/admin/dashboard/AdminSidebar';
+import AdminHeader from '../../components/admin/dashboard/AdminHeader';
+import AdminContent from '../../components/admin/dashboard/AdminContent';
 import '../../assets/css/admin/dashboard.css'; 
 
 function AdminDashboard() {
