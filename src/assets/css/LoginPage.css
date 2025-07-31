@@ -1,0 +1,35 @@
+.panda-wrapper {
+  width: 160px;
+  height: 160px;
+  user-select: none;
+}
+
+.eye {
+  fill: white;
+  stroke: #333;
+  stroke-width: 3;
+}
+.pupil {
+  fill: black;
+  transition: transform 0.1s ease-out;
+  transform-origin: center;
+}
+.hand {
+  fill: #333;
+  transition: transform 0.3s ease;
+  cursor: default;
+}
+.hand-left.cover {
+  transform: translate(20px, -20px) rotate(20deg);
+}
+.hand-right.cover {
+  transform: translate(-20px, -20px) rotate(-20deg);
+}
+.eye-lid {
+  fill: #333;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.eye-lid.cover {
+  opacity: 1;
+}
