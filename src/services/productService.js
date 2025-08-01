@@ -1,25 +1,38 @@
+import axios from 'axios';
 
 
-import api from '../api/api'; // Adjust the path if your api module is located elsewhere
+const API = axios.create({
+  baseURL: 'http://localhost:8080/api/products',
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
+  timeout: 5000,
+ 
+});
 
-export const getListProducts = () => {
-  return api.get('/products/list-product');
-};
-
-export const searchProductByName = (data) => {
-  return api.get('/products/search-product', { params: data });
-};
-
-
-export const addProduct = (data) => {
-  return api.post('/products/add-product', data);
-}
-export const updateProduct = (id, data) => {
-  return api.put(`/products/update-product/${id}`, data);
-};
-
-export const deleteProduct = (id) => {
-  return api.delete(`/products/delete-product/${id}`);
-};
+// Thêm token vào mỗi request nếu có
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+      console.log('Token gửi đi:', token);
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 
+export const addProduct = (id, formData) =>
+  API.post(`/add-product`, formData);
+
+export const updateProduct = (id, formData) =>
+  API.put(`/update-product/${id}`, formData);
+
+export const getListProducts = () => API.get('/list-product');
+
+export const deleteProduct = (id) =>
+  API.delete(`/delete-product/${id}`);
